@@ -3,6 +3,7 @@ package com.example.journalApp.entity;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -18,6 +19,7 @@ import java.util.List;
 @Document(collection = "journal_entries1")
 
 @Data
+@NoArgsConstructor
 public class JournalEntry {
 
 
