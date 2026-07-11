@@ -28,13 +28,15 @@ public class JournalEntryController {
     @GetMapping("/{username}")
     public ResponseEntity<?> getAllJournalEntriesOfUser(@PathVariable String username) {
 
-        User user = userService.findByUsername(username);
+        Optional<User> user = userService.findByUsername(username);
 
-        if (user == null) {
+        if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        List<JournalEntry> all = user.getJournalEntries();
+        List<JournalEntry> all = user.get().getJournalEntries();
+
+
 
         if (all != null && !all.isEmpty()) {
             return new ResponseEntity<>(all, HttpStatus.OK);
@@ -44,16 +46,17 @@ public class JournalEntryController {
     }
 
     // Create a new journal entry
-    @PostMapping("{username}")
-    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry , @PathVariable String username) {
+    @PostMapping("/{username}")
+    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry,@PathVariable String username) {
         try{
 
 
             myEntry.setDate(LocalDateTime.now());
-            journalEntryService.saveEntry(myEntry , username);
+            journalEntryService.saveEntry(myEntry,username );
             return new ResponseEntity<>(myEntry , HttpStatus.CREATED);
 
         }catch(Exception e){
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         }

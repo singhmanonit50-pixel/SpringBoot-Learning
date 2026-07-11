@@ -6,7 +6,6 @@ import com.example.journalApp.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,31 +19,48 @@ public class JournalEntryService {
     @Autowired
     private UserService userService;
 
-    @Transactional
-    public void saveEntry(JournalEntry journalEntry, String username){
-        User user = userService.findByUsername(username);
-        JournalEntry saved  = journalEntryRepository.save(journalEntry);
+    // Naya entry create karne ke liye (list me add karo)
+    public void saveEntry(JournalEntry journalEntry, String username) {
+        Optional<User> userOpt = userService.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+        User user = userOpt.get();
+        JournalEntry saved = journalEntryRepository.save(journalEntry);
         user.getJournalEntries().add(saved);
-        user.setUsername(null);
-        userService.saveUser(user);
+        userService.updateExistingUser(user);
     }
-    public void saveEntry(JournalEntry journalEntry){
 
+    // Existing entry ko update karne ke liye (list me dobara add mat karo)
+    public void updateEntry(JournalEntry journalEntry) {
         journalEntryRepository.save(journalEntry);
     }
-    public List<JournalEntry > getAll(){
 
+    public void saveEntry(JournalEntry journalEntry) {
+        journalEntryRepository.save(journalEntry);
+    }
+
+    public List<JournalEntry> getAll() {
         return journalEntryRepository.findAll();
     }
 
-    public Optional<JournalEntry> findById(ObjectId id){
+    public Optional<JournalEntry> findById(ObjectId id) {
         return journalEntryRepository.findById(id);
     }
-    public void deleteById(ObjectId id, String username){
-        User user = userService.findByUsername(username);
-        user.getJournalEntries().removeIf(x -> x.getId().equals(id));
-        userService.saveUser(user);
-        journalEntryRepository.deleteById(id);
 
+    public void deleteById(ObjectId id, String username) {
+        Optional<User> userOpt = userService.findByUsername(username);
+
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+
+        User user = userOpt.get();
+
+        user.getJournalEntries().removeIf(x -> x.getId().equals(id));
+
+        userService.updateExistingUser(user);
+
+        journalEntryRepository.deleteById(id);
     }
 }

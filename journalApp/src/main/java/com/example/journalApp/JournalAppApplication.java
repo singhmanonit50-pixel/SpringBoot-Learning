@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.lang.management.ManagementFactory;
 
 @SpringBootApplication
-@EnableTransactionManagement
+
 public class JournalAppApplication {
 
 	public static void main(String[] args) {
